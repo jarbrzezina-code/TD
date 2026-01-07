@@ -259,28 +259,43 @@ class Enemy:
         self.x = x
         self.y = y
         self.path_index = 0
-        
+        self.type = type
+
         if type == "Fast":
             self.max_health = 50
             self.health = 50
             self.speed = 120
-            color = "yellow"
+            self.t = turtle.Turtle()
+            self.t.color("yellow")
         elif type == "Tank":
             self.max_health = 300
             self.health = 300
             self.speed = 40
-            color = "darkred"
+            self.t = turtle.Turtle()
+            self.t.color("darkred")
+        elif type == "Boss":
+            self.max_health = 1500
+            self.health = 1500
+            self.speed = 50
+            self.t = turtle.Turtle()
+            self.t.shapesize(2)
+            self.t.color("magenta")
         else:
             self.max_health = 100
             self.health = 100
             self.speed = 60
-            color = "red"
+            self.t = turtle.Turtle()
+            self.t.color("red")
 
-        self.t = turtle.Turtle()
         self.t.shape("circle")
-        self.t.color(color)
         self.t.penup()
         self.t.goto(self.x, self.y)
+
+        #self.t = turtle.Turtle()
+        #self.t.shape("circle")
+        #self.t.color(color)
+        #self.t.penup()
+        #self.t.goto(self.x, self.y)
 
         self.hp_bar = turtle.Turtle()
         self.hp_bar.hideturtle()
@@ -389,6 +404,7 @@ wn.onclick(handle_click)
 time_since_last_spawn = 0
 spawn_delay = 1.0
 enemies_to_spawn = 3
+enemy_types_cycle = ["Fast","Tank","Boss"]
 
 last_time = time.time()
 
@@ -405,9 +421,10 @@ while True:
     last_time = now
 
     time_since_last_spawn += dt
-
+    
     if enemies_to_spawn > 0 and time_since_last_spawn >= spawn_delay:
-        enemies.append(Enemy(waypoints[0][0], waypoints[0][1]))
+        e_type = enemy_types_cycle[(wave_number-1) % len(enemy_types_cycle)]
+        enemies.append(Enemy(waypoints[0][0], waypoints[0][1], e_type))
         enemies_to_spawn -= 1
         time_since_last_spawn = 0
 
