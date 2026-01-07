@@ -46,7 +46,7 @@ sidebar.goto(340, 300)
 sidebar.color("white")
 sidebar.write("TOWERS", align="center", font=("Arial", 18, "bold"))
 
-money_value = 20000
+money_value = 200
 money_text = turtle.Turtle()
 money_text.hideturtle()
 money_text.penup()
@@ -98,7 +98,7 @@ placing_mode = False
 # TOWER TYPES
 # ==========================================
 tower_types = {
-    "Sniper": {"damage": 40, "range": 300, "speed": 1.5, "color": "purple", "cost": 150},
+    "Sniper": {"damage": 600, "range": 300, "speed": 3, "color": "purple", "cost": 150},
     "Splash": {"damage": 10, "range": 120, "speed": 1.0, "color": "orange", "cost": 140},
     "Fast":   {"damage": 40, "range": 150, "speed": 0.5, "color": "blue",   "cost": 100},
 }
