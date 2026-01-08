@@ -59,7 +59,7 @@ def update_money_display():
 
 update_money_display()
 
-lives = 20
+lives = 1
 lives_text = turtle.Turtle()
 lives_text.hideturtle()
 lives_text.penup()
@@ -93,6 +93,11 @@ towers = []
 enemies = []
 selected_tower_type = None
 placing_mode = False
+
+projectiles = []
+PROJECTILE_SPEED = 400
+PROJECTILE_SIZE = 0.3
+
 
 # ==========================================
 # TOWER TYPES
@@ -242,13 +247,69 @@ class Tower:
     def update(self, dt, enemies):
         if self.cooldown > 0:
             self.cooldown -= dt
-        for e in enemies:
-            dist = math.hypot(e.x - self.x, e.y - self.y)
-            if dist <= self.range and self.cooldown <= 0:
-                e.health -= self.damage
-                e.draw_health_bar()
-                self.cooldown = self.speed
+
+    # find first enemy in range
+        target = None
+        for enemy in enemies:
+            dist = math.hypot(enemy.x - self.x, enemy.y - self.y)
+            if dist <= self.range:
+                target = enemy
                 break
+
+        if target and self.cooldown <= 0:
+            # create projectile
+            projectiles.append(
+            Projectile(self.x, self.y, target, self.damage, self.t.color()[0])
+        )
+            self.cooldown = self.speed
+
+class Projectile:
+    def __init__(self, x, y, target, damage, color="white"):
+        self.x = x
+        self.y = y
+        self.target = target
+        self.damage = damage
+
+        self.t = turtle.Turtle()
+        self.t.shape("circle")
+        self.t.shapesize(PROJECTILE_SIZE)
+        self.t.color(color)
+        self.t.penup()
+        self.t.goto(self.x, self.y)
+
+    def update(self, dt):
+        # if target is dead or removed
+        if self.target is None or self.target.health <= 0:
+            self.destroy()
+            return False
+
+        tx, ty = self.target.x, self.target.y
+        dx = tx - self.x
+        dy = ty - self.y
+        dist = math.hypot(dx, dy)
+
+        if dist == 0:
+            dist = 0.001
+
+        # movement
+        step = PROJECTILE_SPEED * dt
+        self.x += dx / dist * step
+        self.y += dy / dist * step
+        self.t.goto(self.x, self.y)
+
+        # hit detection
+        if dist < 10:
+            self.target.health -= self.damage
+            self.target.draw_health_bar()
+            self.destroy()
+            return False  
+
+        return True  # still alive
+
+    def destroy(self):
+        self.t.hideturtle()
+        self.t.clear()
+
 
 
 # ==========================================
@@ -433,6 +494,8 @@ while True:
         enemies_to_spawn = 3 + wave_number * 2
         update_wave_display()
 
+
+
     # Move enemies
     new_list = []
     for e in enemies:
@@ -440,9 +503,17 @@ while True:
             new_list.append(e)
     enemies = new_list
 
-    # Towers fire
     for t in towers:
         t.update(dt, enemies)
+
+    new_projectile_list = []
+    for p in projectiles:
+        if p.update(dt):
+            new_projectile_list.append(p)
+    projectiles = new_projectile_list
+
+
+
 
     # Kill dead enemies
     new_alive = []
